@@ -121,15 +121,17 @@ def main():
                             if not ret:
                                 print("Error: Could not read frame from webcam.")
                                 break
-                            digit = recognize_digit(frame, model)
-                            recognized_digits.append(digit)
-                            print(f"Recognized digit: {digit}")
-                            time.sleep(0.5) # 0.5초 간격
+
+                             # 숫자 인식 및 결과 저장
+                            recognized_digit = recognize_digit(frame, model)
+                            recognized_digits.append(recognized_digit)
+                            print(f"Recognized digit: {recognized_digit}")
+                            cv2.waitKey(500)  # 0.5초 간격
                         
                         if recognized_digits:
-                            # 최빈값 계산
                             most_frequent_digit = Counter(recognized_digits).most_common(1)[0][0]
                             print(f"Most frequently recognized digit: {most_frequent_digit}")
+
                             # 인식된 숫자 전송
                             send_to_uart(uart, str(most_frequent_digit))
                         else:
