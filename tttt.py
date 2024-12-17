@@ -1,29 +1,3 @@
-# import serial
-# def read_uart():
-
-#     ser = serial.Serial(
-#         port='/dev/ttyAMA2', 
-#         baudrate=9600,   
-#         timeout=1  
-#     )
-
-#     try:
-#         print("Listening on UART (AMA2)...")
-#         while True:
-#             if ser.in_waiting > 0:  #
-#                 data = ser.readline().decode('utf-8').strip()  # ?????? ?��? ?????
-#                 print(f"Received: {data}")
-#                 ser.write("0\r".encode('utf-8'))
-#                 break
-#     except KeyboardInterrupt:
-#         print("\nExiting...")
-#     finally:
-#         ser.close()  # ???? ?? ??? ???
-
-# if __name__ == "__main__":
-#     while 1:
-       
-
 import time
 import numpy as np
 import tensorflow as tf
@@ -82,7 +56,7 @@ def recognize_digit(frame, model):
     return predicted_label
 #UART 송신 함수
 def send_to_uart(uart, data):
-    uart.write((data+"\n").encode('utf-8'))
+    uart.write((data+"\r").encode('utf-8'))
     print(f"Sent to UART: {data}")
 
 def main():
@@ -106,7 +80,9 @@ def main():
             # BLANK 문자를 보내온다고 가정하므로, in_waiting > 0일 때 read
             if uart.in_waiting > 0:
                 data = uart.readline().decode('utf-8').strip()
-                if data == 'B':  # BLANK 요청 가정
+                print(data == 'B')
+                print(f"Received: {data}") 
+                if data != 'A':  # BLANK 요청 가정
                     print("Received request from S32K144.")
                     # 2. 초음파 센서로 선박 존재 확인
                     if not check_distance():
@@ -139,6 +115,8 @@ def main():
                             print("No digits recognized. Sending NOT_EXIST.")
                             send_to_uart(uart, "NOT_EXIST")
 
+                elif data == '\r':
+                    continue
                 else:
                     # 요청 형식이 BLANK('B')가 아닐 경우 처리 로직 (필요하면 작성)
                     print(f"Unknown request: {data}")
